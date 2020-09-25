@@ -1,0 +1,149 @@
+[
+  {
+    "output": [
+      {
+        "variables": [
+          {
+            "variable": "key",
+            "relationship": {
+              "path": "key",
+              "flow": "concurrent_loan_checker_plus"
+            }
+          },
+          {
+            "variable": "data",
+            "relationship": {
+              "path": "data",
+              "flow": "concurrent_loan_checker_plus"
+            }
+          }
+        ],
+        "step": "output"
+      }
+    ],
+    "input": [
+      {
+        "variables": [
+          "ssn",
+          "report_names",
+          "report_name",
+          "purchaser",
+          "applicant_identifier_type",
+          "applicant_identifier"
+        ],
+        "step": "input"
+      }
+    ],
+    "resources": [
+      {
+        "arn": "arn:aws:lambda:us-east-2:643927032162:function:odi-concurrent_loan_checker_plus-staging",
+        "relationship": {
+          "environment": "staging"
+        }
+      },
+      {
+        "arn": "arn:aws:lambda:us-east-2:643927032162:function:odi-concurrent_loan_checker_plus-production",
+        "relationship": {
+          "environment": "production"
+        }
+      }
+    ],
+    "step": "buy_and_store_concurrent_loan_checker",
+    "input_control_transfer": [],
+    "properties": {
+      "uuid": "buy_and_store_concurrent_loan_checker"
+    },
+    "output_control_transfer": [],
+    "labels": ["Step"]
+  },
+  {
+    "output": [
+      {
+        "variables": [
+          {
+            "variable": "ssn",
+            "relationship": {
+              "path": "ssn",
+              "flow": "concurrent_loan_checker_plus"
+            }
+          },
+          {
+            "variable": "report_names",
+            "relationship": {
+              "path": "null",
+              "default": ["concurrent_loan_checker"],
+              "flow": "concurrent_loan_checker_plus"
+            }
+          },
+          {
+            "variable": "report_name",
+            "relationship": {
+              "path": "null",
+              "default": "concurrent_loan_checker",
+              "flow": "concurrent_loan_checker_plus"
+            }
+          },
+          {
+            "variable": "purchaser",
+            "relationship": {
+              "path": "purchaser",
+              "flow": "concurrent_loan_checker_plus"
+            }
+          },
+          {
+            "variable": "applicant_identifier_type",
+            "relationship": {
+              "path": "applicant_identifier_type",
+              "default": "identity_account_id",
+              "flow": "concurrent_loan_checker_plus"
+            }
+          },
+          {
+            "variable": "applicant_identifier",
+            "relationship": {
+              "path": "applicant_identifier",
+              "flow": "concurrent_loan_checker_plus"
+            }
+          }
+        ],
+        "step": "buy_and_store_concurrent_loan_checker"
+      }
+    ],
+    "input": [],
+    "resources": [
+      {
+        "arn": null,
+        "relationship": null
+      }
+    ],
+    "step": "input",
+    "input_control_transfer": [],
+    "properties": {
+      "uuid": "input"
+    },
+    "output_control_transfer": [],
+    "labels": ["Step"]
+  },
+  {
+    "output": [],
+    "input": [
+      {
+        "variables": ["key", "data"],
+        "step": "buy_and_store_concurrent_loan_checker"
+      }
+    ],
+    "resources": [
+      {
+        "arn": null,
+        "relationship": null
+      }
+    ],
+    "step": "output",
+    "input_control_transfer": [],
+    "properties": {
+      "uuid": "output"
+    },
+    "output_control_transfer": [],
+    "labels": ["Step"]
+  }
+]
