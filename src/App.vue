@@ -1,19 +1,19 @@
 <template>
   <v-app>
     <v-main>
-      <Flow />
+      <ManageFlow />
     </v-main>
   </v-app>
 </template>
 
 <script>
-import Flow from "./components/Flow";
+import ManageFlow from "./components/ManageFlow";
 
 export default {
   name: "App",
 
   components: {
-    Flow,
+    ManageFlow,
   },
 
   data: () => ({

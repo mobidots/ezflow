@@ -1,0 +1,657 @@
+[
+  {
+    "output": [
+      {
+        "variables": [
+          {
+            "variable": "lambda_report_key",
+            "relationship": {
+              "path": "key",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "emit_standard_values_to_eis"
+      },
+      {
+        "variables": [
+          {
+            "variable": "key",
+            "relationship": {
+              "path": "key",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "output"
+      },
+      {
+        "variables": [
+          {
+            "variable": "report_key",
+            "relationship": {
+              "path": "key",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "emit_to_ops_fact"
+      },
+      {
+        "variables": [
+          {
+            "variable": "data",
+            "relationship": {
+              "path": "data",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "transform_for_ops_fact"
+      },
+      {
+        "variables": [
+          {
+            "variable": "data",
+            "relationship": {
+              "path": "data",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "transform"
+      }
+    ],
+    "input": [
+      {
+        "variables": [
+          "license_state",
+          "purchaser",
+          "middle_name",
+          "zip",
+          "state",
+          "ssn",
+          "ssn_last4",
+          "license_number",
+          "last_name",
+          "home_phone",
+          "first_name",
+          "dob",
+          "city",
+          "address_line_2",
+          "address_line_1"
+        ],
+        "step": "input"
+      }
+    ],
+    "resources": [
+      {
+        "arn": "arn:function:odi-risk_view-staging",
+        "relationship": {
+          "environment": "staging"
+        }
+      },
+      {
+        "arn": "arn:function:odi-risk_view-production",
+        "relationship": {
+          "environment": "production"
+        }
+      }
+    ],
+    "step": "buy_risk_view",
+    "input_control_transfer": [
+      {
+        "steps": [
+          "read_risk_view"
+        ]
+      }
+    ],
+    "properties": {
+      "uuid": "buy_risk_view"
+    },
+    "output_control_transfer": [
+      {
+        "relationships": [
+          {
+            "path": "data != null",
+            "flow": "risk_view"
+          }
+        ],
+        "step": "emit_standard_values_to_eis"
+      },
+      {
+        "relationships": [
+          {
+            "path": "data != null",
+            "flow": "risk_view"
+          }
+        ],
+        "step": "emit_to_ops_fact"
+      }
+    ],
+    "labels": [
+      "Step"
+    ]
+  },
+  {
+    "output": [],
+    "input": [
+      {
+        "variables": [
+          "values"
+        ],
+        "step": "transform"
+      },
+      {
+        "variables": [
+          "lambda_report_key"
+        ],
+        "step": "buy_risk_view"
+      }
+    ],
+    "resources": [
+      {
+        "arn": "arn:function:odi-kapow_emitter-staging",
+        "relationship": {
+          "environment": "staging"
+        }
+      },
+      {
+        "arn": "arn:function:odi-kapow_emitter-production",
+        "relationship": {
+          "environment": "production"
+        }
+      }
+    ],
+    "step": "emit_standard_values_to_eis",
+    "input_control_transfer": [
+      {
+        "steps": [
+          "buy_risk_view"
+        ]
+      }
+    ],
+    "properties": {
+      "schema": "odi",
+      "async": true,
+      "database": "staging",
+      "topic": "decision-support-data",
+      "vanity": "eis-reporting-masterdb.enova.com",
+      "uuid": "emit_standard_values_to_eis",
+      "table": "credit_report_values"
+    },
+    "output_control_transfer": [],
+    "labels": [
+      "Step"
+    ]
+  },
+  {
+    "output": [],
+    "input": [
+      {
+        "variables": [
+          "account_id"
+        ],
+        "step": "input"
+      },
+      {
+        "variables": [
+          "data"
+        ],
+        "step": "transform_for_ops_fact"
+      },
+      {
+        "variables": [
+          "report_key"
+        ],
+        "step": "buy_risk_view"
+      }
+    ],
+    "resources": [
+      {
+        "arn": "arn:function:odi-kapow_emitter-staging",
+        "relationship": {
+          "environment": "staging"
+        }
+      },
+      {
+        "arn": "arn:function:odi-kapow_emitter-production",
+        "relationship": {
+          "environment": "production"
+        }
+      }
+    ],
+    "step": "emit_to_ops_fact",
+    "input_control_transfer": [
+      {
+        "steps": [
+          "buy_risk_view"
+        ]
+      }
+    ],
+    "properties": {
+      "schema": "credit_report_fact",
+      "flatten": [
+        "data"
+      ],
+      "async": true,
+      "database": "ops_fact_kapow",
+      "topic": "decision-support-data",
+      "vanity": "ops-fact-masterdb.enova.com",
+      "uuid": "emit_to_ops_fact",
+      "table": "test_risk_view_fact"
+    },
+    "output_control_transfer": [],
+    "labels": [
+      "Step"
+    ]
+  },
+  {
+    "output": [
+      {
+        "variables": [
+          {
+            "variable": "expected_format",
+            "relationship": {
+              "path": "expected_format",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "key",
+            "relationship": {
+              "path": "key",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "input_format",
+            "relationship": {
+              "path": "input_format",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "read_risk_view"
+      },
+      {
+        "variables": [
+          {
+            "variable": "license_state",
+            "relationship": {
+              "path": "license_state",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "zip",
+            "relationship": {
+              "path": "zip",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "purchaser",
+            "relationship": {
+              "path": "purchaser",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "ssn",
+            "relationship": {
+              "path": "ssn",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "ssn_last4",
+            "relationship": {
+              "path": "ssn_last4",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "middle_name",
+            "relationship": {
+              "path": "middle_name",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "state",
+            "relationship": {
+              "path": "state",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "license_number",
+            "relationship": {
+              "path": "license_number",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "last_name",
+            "relationship": {
+              "path": "last_name",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "home_phone",
+            "relationship": {
+              "path": "home_phone",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "first_name",
+            "relationship": {
+              "path": "first_name",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "dob",
+            "relationship": {
+              "path": "dob",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "city",
+            "relationship": {
+              "path": "city",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "address_line_2",
+            "relationship": {
+              "path": "address_line_2",
+              "flow": "risk_view"
+            }
+          },
+          {
+            "variable": "address_line_1",
+            "relationship": {
+              "path": "address_line_1",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "buy_risk_view"
+      },
+      {
+        "variables": [
+          {
+            "variable": "key",
+            "relationship": {
+              "path": "key",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "output"
+      },
+      {
+        "variables": [
+          {
+            "variable": "account_id",
+            "relationship": {
+              "path": "account_id",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "emit_to_ops_fact"
+      }
+    ],
+    "input": [],
+    "resources": [
+      {
+        "arn": "arn:function:odi-input-staging",
+        "relationship": {
+          "environment": "staging"
+        }
+      },
+      {
+        "arn": "arn:function:odi-input-production",
+        "relationship": {
+          "environment": "production"
+        }
+      }
+    ],
+    "step": "input",
+    "input_control_transfer": [],
+    "properties": {
+      "uuid": "input"
+    },
+    "output_control_transfer": [],
+    "labels": [
+      "Step"
+    ]
+  },
+  {
+    "output": [],
+    "input": [
+      {
+        "variables": [
+          "key"
+        ],
+        "step": "input"
+      },
+      {
+        "variables": [
+          "key"
+        ],
+        "step": "buy_risk_view"
+      },
+      {
+        "variables": [
+          "data"
+        ],
+        "step": "transform"
+      }
+    ],
+    "resources": [
+      {
+        "arn": "arn:function:odi-output-staging",
+        "relationship": {
+          "environment": "staging"
+        }
+      },
+      {
+        "arn": "arn:function:odi-output-production",
+        "relationship": {
+          "environment": "production"
+        }
+      }
+    ],
+    "step": "output",
+    "input_control_transfer": [],
+    "properties": {
+      "uuid": "output"
+    },
+    "output_control_transfer": [],
+    "labels": [
+      "Step"
+    ]
+  },
+  {
+    "output": [
+      {
+        "variables": [
+          {
+            "variable": "data",
+            "relationship": {
+              "path": "data",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "transform"
+      }
+    ],
+    "input": [
+      {
+        "variables": [
+          "key",
+          "expected_format",
+          "input_format"
+        ],
+        "step": "input"
+      }
+    ],
+    "resources": [
+      {
+        "arn": "arn:function:odi-read_report-staging",
+        "relationship": {
+          "environment": "staging"
+        }
+      },
+      {
+        "arn": "arn:function:odi-read_report-production",
+        "relationship": {
+          "environment": "production"
+        }
+      }
+    ],
+    "step": "read_risk_view",
+    "input_control_transfer": [],
+    "properties": {
+      "uuid": "read_risk_view"
+    },
+    "output_control_transfer": [
+      {
+        "relationships": [
+          {
+            "path": "data == null",
+            "flow": "risk_view"
+          }
+        ],
+        "step": "buy_risk_view"
+      }
+    ],
+    "labels": [
+      "Step"
+    ]
+  },
+  {
+    "output": [
+      {
+        "variables": [
+          {
+            "variable": "values",
+            "relationship": {
+              "path": "data",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "emit_standard_values_to_eis"
+      },
+      {
+        "variables": [
+          {
+            "variable": "data",
+            "relationship": {
+              "path": "data",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "output"
+      }
+    ],
+    "input": [
+      {
+        "variables": [
+          "data"
+        ],
+        "step": "read_risk_view"
+      },
+      {
+        "variables": [
+          "data"
+        ],
+        "step": "buy_risk_view"
+      }
+    ],
+    "resources": [
+      {
+        "arn": "arn:function:odi-transform_lookup-staging",
+        "relationship": {
+          "environment": "staging"
+        }
+      },
+      {
+        "arn": "arn:function:odi-transform_lookup-production",
+        "relationship": {
+          "environment": "production"
+        }
+      }
+    ],
+    "step": "transform",
+    "input_control_transfer": [],
+    "properties": {
+      "fileName": "risk_view.json",
+      "uuid": "transform"
+    },
+    "output_control_transfer": [],
+    "labels": [
+      "Step"
+    ]
+  },
+  {
+    "output": [
+      {
+        "variables": [
+          {
+            "variable": "data",
+            "relationship": {
+              "path": "data",
+              "flow": "risk_view"
+            }
+          }
+        ],
+        "step": "emit_to_ops_fact"
+      }
+    ],
+    "input": [
+      {
+        "variables": [
+          "data"
+        ],
+        "step": "buy_risk_view"
+      }
+    ],
+    "resources": [
+      {
+        "arn": "arn:function:odi-transform_lookup-staging",
+        "relationship": {
+          "environment": "staging"
+        }
+      },
+      {
+        "arn": "arn:function:odi-transform_lookup-production",
+        "relationship": {
+          "environment": "production"
+        }
+      }
+    ],
+    "step": "transform_for_ops_fact",
+    "input_control_transfer": [],
+    "properties": {
+      "async": true,
+      "fileName": "risk_view_opsfact.json",
+      "uuid": "transform_for_ops_fact"
+    },
+    "output_control_transfer": [],
+    "labels": [
+      "Step"
+    ]
+  }
+]
