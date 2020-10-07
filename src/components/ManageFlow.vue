@@ -1,7 +1,29 @@
 <template>
   <div>
-    <LoadJson @load-json="loadJson" />
-    <Flow :flowData="flowData" @show-step-details="showStepDetails" />
+    <v-row class="pa-2" no-gutters justify="space-between">
+      <v-col md="2">
+        <LoadJson @load-json="loadJson" />
+      </v-col>
+      <v-col md="2">
+        <v-switch
+          class="pa-2 mt-0"
+          v-model="nodeLayout"
+          color="primary"
+          label="Node Layout"
+          hide-details
+        ></v-switch>
+      </v-col>
+    </v-row>
+    <SankeyFlow
+      :flowData="flowData"
+      @show-step-details="showStepDetails"
+      v-if="!nodeLayout"
+    />
+    <Flow
+      :flowData="flowData"
+      @show-step-details="showStepDetails"
+      v-if="nodeLayout"
+    />
     <v-navigation-drawer
       v-model="drawer"
       absolute
@@ -22,17 +44,19 @@
 <script>
 import LoadJson from "./LoadJson";
 import Flow from "./Flow";
+import SankeyFlow from "./SankeyFlow";
 import Details from "./Details";
 import data from "../data/testFlow2.json";
 
 export default {
   name: "ManageFlow",
-  components: { LoadJson, Flow, Details },
+  components: { LoadJson, Flow, SankeyFlow, Details },
   data() {
     return {
       drawer: false,
       flowData: data,
       stepDetails: null,
+      nodeLayout: false
     };
   },
   methods: {
@@ -49,10 +73,9 @@ export default {
     },
     loadJson(json) {
       this.flowData = JSON.parse(json);
-    },
-  },
+    }
+  }
 };
 </script>
 
-<style>
-</style>
+<style></style>

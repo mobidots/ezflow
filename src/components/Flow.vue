@@ -8,29 +8,32 @@ import * as d3 from "d3";
 export default {
   name: "Flow",
   props: {
-    flowData: Array,
+    flowData: Array
   },
   data() {
     return {
-      selectedStep: null,
+      selectedStep: null
     };
   },
   mounted() {
     this.generateFlow();
   },
   watch: {
-    flowData: function (newVal) {
+    flowData: function(newVal) {
       console.log("changed!", newVal);
       d3.select("div#container svg").remove();
       this.generateFlow();
-    },
+    }
   },
   methods: {
     generateFlow() {
-      const steps = this.flowData.map((d) => Object.create(d));
+      const width = document.getElementById("container").clientWidth;
+      const height = document.getElementById("container").clientHeight;
+
+      const steps = this.flowData.map(d => Object.create(d));
       const links = steps
-        .map((s) => {
-          return s.output.map((o) => {
+        .map(s => {
+          return s.output.map(o => {
             let variable = Object.create(o);
             variable.sourceStep = s.step;
             variable.source = s.step;
@@ -41,12 +44,12 @@ export default {
         .flat();
 
       const blockers = steps
-        .map((s) => {
-          return s.output_control_transfer.map((o) => {
+        .map(s => {
+          return s.output_control_transfer.map(o => {
             return {
               sourceStep: s.step,
               source: s.step,
-              target: o.step,
+              target: o.step
             };
           });
         })
@@ -55,21 +58,19 @@ export default {
       const radius = 25;
 
       let svg = d3
-          .select("div#container")
-          .append("svg")
-          .attr("preserveAspectRatio", "xMinYMin meet")
-          .attr("viewBox", "0 0 1000 600")
-          .attr("width", "100%")
-          .attr("height", "100%")
-          .call(
-            d3.zoom().on("zoom", function (e) {
-              svg.attr("transform", e.transform);
-            })
-          )
-          .on("dblclick.zoom", null)
-          .append("g"),
-        width = 1000,
-        height = 500;
+        .select("div#container")
+        .append("svg")
+        .attr("preserveAspectRatio", "xMinYMin meet")
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .call(
+          d3.zoom().on("zoom", function(e) {
+            svg.attr("transform", e.transform);
+          })
+        )
+        .on("dblclick.zoom", null)
+        .append("g");
 
       svg
         .append("defs")
@@ -115,24 +116,37 @@ export default {
           "link",
           d3
             .forceLink(links)
-            .id((d) => d.step)
-            .distance(50)
-            .strength(1)
+            .id(d => d.step)
+            .distance(250)
+            .strength(0.4)
         )
         .force(
           "link",
           d3
             .forceLink(blockers)
-            .id((d) => d.step)
-            .distance(50)
-            .strength(1)
+            .id(d => d.step)
+            .distance(250)
+            .strength(0.4)
         )
-        .force("charge", d3.forceManyBody().strength(-20))
-        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("charge", d3.forceManyBody().strength(-200))
+        // .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("y", d3.forceY(height / 2))
+        .force("x", d3.forceX(width / 2))
+        .force(
+          "xPosition",
+          d3
+            .forceX(function(d) {
+              console.log(d);
+              if (d.step === "input") return 100;
+              if (d.step === "output") return 1000;
+              return Math.abs(d.y * 10) + 500;
+            })
+            .strength(2)
+        )
         .force("collisionForce", collisionForce);
 
       const scale = d3.scaleOrdinal(d3.schemeCategory10);
-      const color = (d) => {
+      const color = d => {
         if (d.step == "input" || d.step == "output") return scale(0);
         return scale(1);
       };
@@ -161,7 +175,7 @@ export default {
         .attr("class", "edgepath")
         .attr("fill-opacity", 0)
         .attr("stroke-opacity", 0)
-        .attr("id", function (d, i) {
+        .attr("id", function(d, i) {
           return "edgepath" + i;
         })
         .style("pointer-events", "none");
@@ -173,7 +187,7 @@ export default {
         .append("text")
         .style("pointer-events", "none")
         .attr("class", "edgelabel")
-        .attr("id", function (d, i) {
+        .attr("id", function(d, i) {
           return "edgelabel" + i;
         })
         .attr("font-size", 8)
@@ -183,13 +197,13 @@ export default {
 
       edgelabels
         .append("textPath")
-        .attr("xlink:href", function (d, i) {
+        .attr("xlink:href", function(d, i) {
           return "#edgepath" + i;
         })
         .style("text-anchor", "middle")
         .style("pointer-events", "none")
         .attr("startOffset", "50%")
-        .text(function () {
+        .text(function() {
           return "BLOCKS";
         });
 
@@ -211,36 +225,39 @@ export default {
           d.fy = null;
         });
 
-      step.append("circle").attr("r", radius).style("fill", color);
+      step
+        .append("circle")
+        .attr("r", radius)
+        .style("fill", color);
 
       step
         .append("text")
         .attr("text-anchor", "middle")
         .attr("y", 35)
-        .text(function (d) {
+        .text(function(d) {
           return d.step;
         });
 
-      step.append("title").text((d) => d.step);
+      step.append("title").text(d => d.step);
 
       simulation.on("tick", () => {
         link
-          .attr("x1", (d) => d.source.x)
-          .attr("y1", (d) => d.source.y)
-          .attr("x2", (d) => d.target.x)
-          .attr("y2", (d) => d.target.y);
+          .attr("x1", d => d.source.x)
+          .attr("y1", d => d.source.y)
+          .attr("x2", d => d.target.x)
+          .attr("y2", d => d.target.y);
 
         linkBlocks
-          .attr("x1", (d) => d.source.x)
-          .attr("y1", (d) => d.source.y)
-          .attr("x2", (d) => d.target.x)
-          .attr("y2", (d) => d.target.y);
+          .attr("x1", d => d.source.x)
+          .attr("y1", d => d.source.y)
+          .attr("x2", d => d.target.x)
+          .attr("y2", d => d.target.y);
 
-        step.attr("transform", function (d) {
+        step.attr("transform", function(d) {
           return "translate(" + d.x + "," + d.y + ")";
         });
 
-        edgepaths.attr("d", function (d) {
+        edgepaths.attr("d", function(d) {
           return (
             "M " +
             d.source.x +
@@ -253,7 +270,7 @@ export default {
           );
         });
 
-        edgelabels.attr("transform", function (d) {
+        edgelabels.attr("transform", function(d) {
           if (d.target.x < d.source.x) {
             var bbox = this.getBBox();
 
@@ -290,8 +307,8 @@ export default {
         .on("start", dragstarted)
         .on("drag", dragged)
         .on("end", dragended);
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -320,7 +337,7 @@ line.blockers {
 }
 
 #container {
-  height: calc(100vh - 10px);
+  height: calc(100vh - 60px);
   width: 100vw;
   display: block;
 }
